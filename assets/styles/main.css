@@ -4,3 +4,66 @@
     box-sizing: border-box;
     margin: 0;
 }
+
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+}
+
+#top {
+    display: flex;
+    background-color: oklch(39.793% 0.00005 271.152);
+    padding: 1vw;
+    justify-content: space-between;
+    gap: 1vw;
+}
+
+#settings-button {
+    cursor: pointer;
+}
+
+#invisible-settings-button {
+    color: oklch(39.793% 0.00005 271.152);
+    user-select: none;
+}
+
+#bottom {
+
+}
+
+#maze {
+    display: flex;
+    flex-direction: column;
+    background-color: oklch(84.882% 0.01661 285.963);
+    gap: 0.2vw;
+    padding: 1vw;
+    align-items: center;
+}
+
+.row {
+    display: flex;
+    gap: 0.2vw;
+}
+
+.cell {
+    min-height: 4.5vw;
+    min-width: 4.5vw;
+    background-color: oklch(69.314% 0.03061 285.546);
+    text-align: center;
+    align-content: center;
+}
+
+.blocked {
+    background-color: oklch(27.599% 0.02944 284.301);
+    z-index: 1;
+}
+
+.visited {
+    background-color: oklch(72.427% 0.22688 139.343);
+    z-index: 1;
+}
+
+i {
+    z-index: 1;
+}

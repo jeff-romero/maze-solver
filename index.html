@@ -4,9 +4,28 @@
         <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1"/>
         <link rel="stylesheet" type="text/css" href="assets/styles/main.css">
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     </head>
     <body>
-
+        <div id="top">
+            <i id="settings-button" class="material-icons">&#xe8b8</i>
+            <button id="solve" onclick="solve()">SOLVE</button>
+            <i id="invisible-settings-button" class="material-icons">&#xe8b8</i>
+        </div>
+        <div id="bottom">
+            <div id="maze">
+                <div class="row">
+                    <div class="cell">S</div>
+                    <div class="cell"></div>
+                    <div class="cell blocked"></div>
+                </div>
+                <div class="row">
+                    <div class="cell"></div>
+                    <div class="cell"></div>
+                    <div class="cell">F</div>
+                </div>
+            </div>
+        </div>
     </body>
     <script src="assets/scripts/script.js"></script>
 </html>
