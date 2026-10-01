@@ -13,18 +13,37 @@
             <i id="invisible-settings-button" class="material-icons">&#xe8b8</i>
         </div>
         <div id="bottom">
-            <div id="maze">
-                <div class="row">
-                    <div class="cell">S</div>
-                    <div class="cell"></div>
-                    <div class="cell blocked"></div>
+            <div id="settings">
+                <div id="settings-top">
+                    <div id="close" class="close-button">&#x2715</div>
                 </div>
-                <div class="row">
-                    <div class="cell"></div>
-                    <div class="cell"></div>
-                    <div class="cell">F</div>
+                <div id="settings-bottom">
+                    <div class="label-input-group">
+                        <span>Rows</span>
+                        <input id="rows" type="number" min="3" max="30">
+                    </div>
+                    <div class="label-input-group">
+                        <span>Columns</span>
+                        <input id="columns" type="number" min="3" max="30">
+                    </div>
+                    <div class="label-input-group">
+                        <span>Source Coordinates</span>
+                        <div>
+                            <input id="source-x" type="number" placeholder="x" min="0" max="29">
+                            <input id="source-y" type="number" placeholder="y" min="0" max="29">
+                        </div>
+                    </div>
+                    <div class="label-input-group">
+                        <span>Target Coordinates</span>
+                        <div>
+                            <input id="target-x" type="number" placeholder="x" min="0" max="29">
+                            <input id="target-y" type="number" placeholder="y" min="0" max="29">
+                        </div>
+                    </div>
+                    <button id="draw-walls" onclick="">DRAW WALLS</button>
                 </div>
             </div>
+            <div id="maze"></div>
         </div>
     </body>
     <script src="assets/scripts/script.js"></script>

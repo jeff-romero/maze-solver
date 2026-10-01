@@ -21,6 +21,8 @@ body {
 
 #settings-button {
     cursor: pointer;
+    user-select: none;
+    color: oklch(100% 0.00011 271.152);
 }
 
 #invisible-settings-button {
@@ -66,4 +68,57 @@ body {
 
 i {
     z-index: 1;
+}
+
+#settings {
+    display: none;
+    position: absolute;
+    width: 50%;
+    z-index: 2;
+    left: 25%;
+    background-color: oklch(77.748% 0.0948 215.788);
+}
+
+#settings-top {
+    display: flex;
+    flex-direction: row-reverse;
+    background-color: oklch(27.629% 0.05482 282.214);
+}
+
+#close {
+    align-self: flex-end;
+    padding: 0.5vw;
+    user-select: none;
+    cursor: pointer;
+    color: oklch(100% 0.00011 271.152);
+}
+
+#close:hover {
+    background-color: oklch(50.474% 0.19113 27.59);
+}
+
+#settings-bottom {
+    display: flex;
+    flex-direction: column;
+    padding: 1vw;
+    gap: 1vw;
+}
+
+.label-input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+input {
+    width: max-content;
+}
+
+@media screen and (max-width: 899px) {
+    input {
+        width: 35%;
+    }
+}
+
+#draw-walls {
+    width: max-content;
 }

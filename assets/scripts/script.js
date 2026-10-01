@@ -124,6 +124,10 @@ class Maze {
             maze.appendChild(row);
         }
     }
+
+    getMaze() {
+        return this.maze;
+    }
 }
 
 const blocked = [
@@ -169,14 +173,132 @@ const blocked = [
     [9, 7],
     [9, 8]
 ];
-const source = [0, 0];
-const target = [9, 9];
-let m = new Maze(10, 10, blocked, source, target);
+const MIN_ROWS = 3;
+const MIN_COLS = 3;
+const MAX_ROWS = 30;
+const MAX_COLS = 30;
+let source = [0, 0];
+let rows = 10;
+let cols = 10;
+let target = [rows - 1, cols - 1];
+let m = new Maze(rows, cols, blocked, source, target);
 let solveButton = document.getElementById("solve");
+let settings = document.getElementById("settings");
+let settingsButton = document.getElementById("settings-button");
+let closeSettingsButton = document.getElementById("close");
+
+/**
+ * mouseover
+ * mouseleave
+ * mousedown
+ * mouseup - toggle display
+ * touchstart 
+ * touchend - toggle display
+ */
+settingsButton.addEventListener("mouseup", (e) => {
+    if (settings.style.display == "block") {
+        settings.style.display = "none";
+    }
+    else {
+        settings.style.display = "block";
+    }
+});
+
+function isValidRowSize(r) {
+    if (!(MIN_ROWS <= r <= MAX_ROWS)) {
+        // TODO: display out of bounds error msg
+        return false;
+    }
+    return true;
+}
+
+function isValidColSize(c) {
+    if (!(MIN_COLS <= c <= MAX_COLS)) {
+        // TODO: display out of bounds error msg
+        return false;
+    }
+    return true;
+}
+
+function setRows(r) {
+    if (!isValidRowSize(r)) {
+        return false;
+    }
+
+    rows = r;
+    return true;
+}
+
+function setCols(c) {
+    if (!isValidColSize(c)) {
+        return false;
+    }
+
+    cols = c;
+    return true;
+}
+
+function isValidSourceCoords(r, c) {
+    if (!(0 <= r <= rows)) {
+        // TODO: display out of bounds error msg
+        return false;
+    }
+    else if (!(0 <= c <= cols)) {
+        // TODO: display out of bounds error msg
+        return false;
+    }
+    else if (m.getMaze().length > 0 && (m.getMaze())[r][c] == 1) {
+        // TODO: display error msg - cannot place source coords on a wall
+        return false;
+    }
+    else if (target[0] == r && source[1] == c) {
+        // TODO: display error msg - source and target coords cannot be the same
+        return false;
+    }
+    return true;
+}
+
+function isValidTargetCoords(r, c) {
+    if (!(0 <= r <= rows)) {
+        // TODO: display out of bounds error msg
+        return false;
+    }
+    else if (!(0 <= c <= cols)) {
+        // TODO: display out of bounds error msg
+        return false;
+    }
+    else if (m.getMaze().length > 0 && (m.getMaze())[r][c] == 1) {
+        // TODO: display error msg - cannot place target coords on a wall
+        return false;
+    }
+    else if (source[0] == r && source[1] == c) {
+        // TODO: display error msg - source and target coords cannot be the same
+        return false;
+    }
+    return true;
+}
+
+function setSourceCoords(r, c) {
+    if (!isValidSourceCoords(r, c)) {
+        return false;
+    }
+
+    source = [r, c];
+    return true;
+}
+
+function setTargetCoords(r, c) {
+    if (!isValidTargetCoords(r, c)) {
+        return false;
+    }
+
+    target = [r, c];
+    return true;
+}
 
 function solve() {
     if (solveButton.innerText == "RESET") {
-        m = new Maze(10, 10, blocked, source, target);
+        m = new Maze(rows, cols, blocked, source, target);
         solveButton.innerText = "SOLVE";
         return;
     }
