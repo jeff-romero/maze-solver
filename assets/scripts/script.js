@@ -184,117 +184,225 @@ let target = [rows - 1, cols - 1];
 let m = new Maze(rows, cols, blocked, source, target);
 let solveButton = document.getElementById("solve");
 let settings = document.getElementById("settings");
-let settingsButton = document.getElementById("settings-button");
-let closeSettingsButton = document.getElementById("close");
+const settingsWindow = document.getElementById("settings");
 
-/**
- * mouseover
- * mouseleave
- * mousedown
- * mouseup - toggle display
- * touchstart 
- * touchend - toggle display
- */
-settingsButton.addEventListener("mouseup", (e) => {
-    if (settings.style.display == "block") {
-        settings.style.display = "none";
+
+function toggleSettingsWindow() {
+    if (settingsWindow.style.display == "block") {
+        settingsWindow.style.display = "none";
     }
     else {
-        settings.style.display = "block";
+        settingsWindow.style.display = "block";
     }
-});
-
-function isValidRowSize(r) {
-    if (!(MIN_ROWS <= r <= MAX_ROWS)) {
-        // TODO: display out of bounds error msg
-        return false;
-    }
-    return true;
 }
 
-function isValidColSize(c) {
-    if (!(MIN_COLS <= c <= MAX_COLS)) {
-        // TODO: display out of bounds error msg
-        return false;
+
+class SettingsButton {
+    constructor() {
+        this.settingsButton = document.getElementById("settings-button");
+
+        this.initializeSettingsButton();
     }
-    return true;
+
+    initializeSettingsButton() {
+        this.settingsButton.addEventListener("mouseover", (e) => {
+
+        });
+
+        this.settingsButton.addEventListener("mouseleave", (e) => {
+
+        });
+
+        this.settingsButton.addEventListener("mousedown", (e) => {
+
+        });
+
+        this.settingsButton.addEventListener("mouseup", (e) => {
+            toggleSettingsWindow();
+        });
+
+        this.settingsButton.addEventListener("touchstart", (e) => {
+
+        });
+
+        this.settingsButton.addEventListener("touchend", (e) => {
+            toggleSettingsWindow();
+        });
+    }
 }
 
-function setRows(r) {
-    if (!isValidRowSize(r)) {
-        return false;
+
+class CloseSettingsButton {
+    constructor() {
+        this.closeSettingsButton = document.getElementById("close");
+
+        this.initializeCloseSettingsButton();
     }
 
-    rows = r;
-    return true;
+    initializeCloseSettingsButton() {
+        this.closeSettingsButton.addEventListener("mouseover", (e) => {
+
+        });
+
+        this.closeSettingsButton.addEventListener("mouseleave", (e) => {
+
+        });
+
+        this.closeSettingsButton.addEventListener("mousedown", (e) => {
+
+        });
+
+        this.closeSettingsButton.addEventListener("mouseup", (e) => {
+            toggleSettingsWindow();
+        });
+
+        this.closeSettingsButton.addEventListener("touchstart", (e) => {
+
+        });
+
+        this.closeSettingsButton.addEventListener("touchend", (e) => {
+            toggleSettingsWindow();
+        });
+    }
 }
 
-function setCols(c) {
-    if (!isValidColSize(c)) {
-        return false;
+
+const ROWS_ERR_ID = "rows-error";
+const COLS_ERR_ID = "cols-error";
+const SRC_COORDS_ERR_ID = "source-coords-error";
+const TGT_COORDS_ERR_ID = "target-coords-error";
+
+
+class Settings {
+    ROWS_ERR_MSG = "Number of rows must be between 3 and 30";
+    COLS_ERR_MSG = "Number of columns must be between 3 and 30";
+    SRC_COORDS_ERR_MSG = "Source coordinates must be between ";
+    TGT_COORDS_ERR_MSG = "Target coordinates must be between ";
+    SAME_COORDS_ERR_MSG = "Source coordinates cannot be the same as the target coordinates";
+    ERR_MSG_COLOR = "oklch(46.946% 0.19265 29.223)";
+    INV_MSG_COLOR = "oklch(77.748% 0.0948 215.788)";
+
+    constructor() {
+        this.rowsErr = document.getElementById(ROWS_ERR_ID);
+        this.colsErr = document.getElementById(COLS_ERR_ID);
+        this.srcCoordsErr = document.getElementById(SRC_COORDS_ERR_ID);
+        this.tgtCoordsErr = document.getElementById(TGT_COORDS_ERR_ID);
+
+        /**
+         * let source = [0, 0];
+         * let rows = 10;
+         * let cols = 10;
+         * let target = [rows - 1, cols - 1];
+         */
+        this.rows = 10;
+        this.cols = 10;
+        this.source = [0, 0];
+        this.target = [this.rows - 1, this.cols - 1];
     }
 
-    cols = c;
-    return true;
+    setErrorMessage(e, text) {
+        e.style.color = "oklch(46.946% 0.19265 29.223)";
+        e.innerText = text;
+    }
+
+    unsetErrorMessage(e) {
+        e.style.color = "oklch(77.748% 0.0948 215.788)";
+        e.innerText = ".";
+    }
+
+    isValidRowSize(r) {
+        if (!(MIN_ROWS <= r <= MAX_ROWS)) {
+            // TODO: display out of bounds error msg
+            return false;
+        }
+        return true;
+    }
+
+    isValidColSize(c) {
+        if (!(MIN_COLS <= c <= MAX_COLS)) {
+            // TODO: display out of bounds error msg
+            return false;
+        }
+        return true;
+    }
+
+    setRows(r) {
+        if (!isValidRowSize(r)) {
+            return false;
+        }
+
+        rows = r;
+        return true;
+    }
+
+    setCols(c) {
+        if (!isValidColSize(c)) {
+            return false;
+        }
+
+        cols = c;
+        return true;
+    }
+
+    isValidSourceCoords(r, c) {
+        if (!(0 <= r <= rows)) {
+            // TODO: display out of bounds error msg
+            return false;
+        }
+        else if (!(0 <= c <= cols)) {
+            // TODO: display out of bounds error msg
+            return false;
+        }
+        else if (m.getMaze().length > 0 && (m.getMaze())[r][c] == 1) {
+            // TODO: display error msg - cannot place source coords on a wall
+            return false;
+        }
+        else if (target[0] == r && source[1] == c) {
+            // TODO: display error msg - source and target coords cannot be the same
+            return false;
+        }
+        return true;
+    }
+
+    isValidTargetCoords(r, c) {
+        if (!(0 <= r <= rows)) {
+            // TODO: display out of bounds error msg
+            return false;
+        }
+        else if (!(0 <= c <= cols)) {
+            // TODO: display out of bounds error msg
+            return false;
+        }
+        else if (m.getMaze().length > 0 && (m.getMaze())[r][c] == 1) {
+            // TODO: display error msg - cannot place target coords on a wall
+            return false;
+        }
+        else if (source[0] == r && source[1] == c) {
+            // TODO: display error msg - source and target coords cannot be the same
+            return false;
+        }
+        return true;
+    }
+
+    setSourceCoords(r, c) {
+        if (!isValidSourceCoords(r, c)) {
+            return false;
+        }
+
+        source = [r, c];
+        return true;
+    }
+
+    setTargetCoords(r, c) {
+        if (!isValidTargetCoords(r, c)) {
+            return false;
+        }
+
+        target = [r, c];
+        return true;
+    }
 }
 
-function isValidSourceCoords(r, c) {
-    if (!(0 <= r <= rows)) {
-        // TODO: display out of bounds error msg
-        return false;
-    }
-    else if (!(0 <= c <= cols)) {
-        // TODO: display out of bounds error msg
-        return false;
-    }
-    else if (m.getMaze().length > 0 && (m.getMaze())[r][c] == 1) {
-        // TODO: display error msg - cannot place source coords on a wall
-        return false;
-    }
-    else if (target[0] == r && source[1] == c) {
-        // TODO: display error msg - source and target coords cannot be the same
-        return false;
-    }
-    return true;
-}
-
-function isValidTargetCoords(r, c) {
-    if (!(0 <= r <= rows)) {
-        // TODO: display out of bounds error msg
-        return false;
-    }
-    else if (!(0 <= c <= cols)) {
-        // TODO: display out of bounds error msg
-        return false;
-    }
-    else if (m.getMaze().length > 0 && (m.getMaze())[r][c] == 1) {
-        // TODO: display error msg - cannot place target coords on a wall
-        return false;
-    }
-    else if (source[0] == r && source[1] == c) {
-        // TODO: display error msg - source and target coords cannot be the same
-        return false;
-    }
-    return true;
-}
-
-function setSourceCoords(r, c) {
-    if (!isValidSourceCoords(r, c)) {
-        return false;
-    }
-
-    source = [r, c];
-    return true;
-}
-
-function setTargetCoords(r, c) {
-    if (!isValidTargetCoords(r, c)) {
-        return false;
-    }
-
-    target = [r, c];
-    return true;
-}
 
 function solve() {
     if (solveButton.innerText == "RESET") {
@@ -313,3 +421,6 @@ function solve() {
 // TODO: option to change board size
 // TODO: option to change source coords
 // TODO: option to change target coords
+
+const settingsButton = new SettingsButton();
+const closeSettingsButton = new CloseSettingsButton();

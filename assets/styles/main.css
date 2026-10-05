@@ -109,6 +109,20 @@ i {
     flex-direction: column;
 }
 
+.settings-label {
+    font-weight: bold;
+}
+
+.settings-input-error {
+    color: oklch(46.946% 0.19265 29.223);
+    user-select: none;
+}
+
+.settings-input-invisible-error {
+    color: oklch(77.748% 0.0948 215.788);
+    user-select: none;
+}
+
 input {
     width: max-content;
 }
