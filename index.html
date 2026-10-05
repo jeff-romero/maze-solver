@@ -21,36 +21,40 @@
                     <div class="label-input-group">
                         <span class="settings-label">Rows</span>
                         <input id="rows" type="number" min="3" max="30">
-                        <span id="rows-error" class="settings-input-invisible-error">
-                            Number of rows must be between 3 and 30
-                        </span>
+                        <span id="rows-error" class="settings-input-invisible-error">.</span>
+                        <span class="settings-input-invisible-error">.</span>
+                        <span class="settings-input-invisible-error">.</span>
+                        <span class="settings-input-invisible-error">.</span>
                     </div>
                     <div class="label-input-group">
                         <span class="settings-label">Columns</span>
                         <input id="columns" type="number" min="3" max="30">
-                        <span id="cols-error" class="settings-input-invisible-error">
-                            Number of columns must be between 3 and 30
-                        </span>
+                        <span id="cols-error" class="settings-input-invisible-error">.</span>
+                        <span class="settings-input-invisible-error">.</span>
+                        <span class="settings-input-invisible-error">.</span>
+                        <span class="settings-input-invisible-error">.</span>
                     </div>
                     <div class="label-input-group">
                         <span class="settings-label">Source Coordinates</span>
                         <div>
-                            <input id="source-x" type="number" placeholder="x" min="0" max="29">
-                            <input id="source-y" type="number" placeholder="y" min="0" max="29">
+                            <input id="source-r" type="number" placeholder="row" min="0" max="29">
+                            <input id="source-c" type="number" placeholder="col" min="0" max="29">
                         </div>
-                        <span id="source-coords-error" class="settings-input-invisible-error">
-                            .
-                        </span>
+                        <span id="source-r-error" class="settings-input-invisible-error">.</span>
+                        <span id="source-c-error" class="settings-input-invisible-error">.</span>
+                        <span id="source-wall-error" class="settings-input-invisible-error">.</span>
+                        <span id="source-same-error" class="settings-input-invisible-error">.</span>
                     </div>
                     <div class="label-input-group">
                         <span class="settings-label">Target Coordinates</span>
                         <div>
-                            <input id="target-x" type="number" placeholder="x" min="0" max="29">
-                            <input id="target-y" type="number" placeholder="y" min="0" max="29">
+                            <input id="target-r" type="number" placeholder="row" min="0" max="29">
+                            <input id="target-c" type="number" placeholder="col" min="0" max="29">
                         </div>
-                        <span id="target-coords-error" class="settings-input-invisible-error">
-                            .
-                        </span>
+                        <span id="target-r-error" class="settings-input-invisible-error">.</span>
+                        <span id="target-c-error" class="settings-input-invisible-error">.</span>
+                        <span id="target-wall-error" class="settings-input-invisible-error">.</span>
+                        <span id="target-same-error" class="settings-input-invisible-error">.</span>
                     </div>
                     <button id="draw-walls" onclick="">DRAW WALLS</button>
                 </div>

@@ -183,7 +183,7 @@ let cols = 10;
 let target = [rows - 1, cols - 1];
 let m = new Maze(rows, cols, blocked, source, target);
 let solveButton = document.getElementById("solve");
-let settings = document.getElementById("settings");
+// let settings = document.getElementById("settings");
 const settingsWindow = document.getElementById("settings");
 
 
@@ -267,37 +267,97 @@ class CloseSettingsButton {
 }
 
 
+// element ids
 const ROWS_ERR_ID = "rows-error";
 const COLS_ERR_ID = "cols-error";
-const SRC_COORDS_ERR_ID = "source-coords-error";
-const TGT_COORDS_ERR_ID = "target-coords-error";
+const SRC_R_ID = "source-r-error";
+const SRC_C_ID = "source-c-error";
+const SRC_R_ERR_ID = "source-r-error";
+const SRC_C_ERR_ID = "source-c-error";
+const SRC_WALL_ERR_ID = "source-wall-error";
+const SRC_SAME_ERR_ID = "source-same-error";
+const TGT_R_ERR_ID = "target-r-error";
+const TGT_C_ERR_ID = "target-c-error";
+const TGT_WALL_ERR_ID = "target-wall-error";
+const TGT_SAME_ERR_ID = "target-same-error";
+const ROWS_INPUT_ID = "rows";
+const COLS_INPUT_ID = "columns";
+const SOURCE_R_ID = "source-r";
+const SOURCE_C_ID = "source-c";
+const TARGET_R_ID = "target-r";
+const TARGET_C_ID = "target-c";
+
+// error messages
+const ROWS_ERR_MSG = "Number of rows must be between 3 and 30";
+const COLS_ERR_MSG = "Number of columns must be between 3 and 30";
+const SRC_R_BOUNDS_ERR_MSG = "Source row coordinates must be between 0 and";
+const SRC_C_BOUNDS_ERR_MSG = "Source column coordinates must be between 0 and";
+const SRC_WALL_ERR_MSG = "Source coordinates cannot be placed on a wall";
+const TGT_R_BOUNDS_ERR_MSG = "Target row coordinates must be between 0 and";
+const TGT_C_BOUNDS_ERR_MSG = "Target column coordinates must be between 0 and";
+const TGT_WALL_ERR_MSG = "Target coordinates cannot be placed on a wall";
+const SAME_COORDS_ERR_MSG = "Source coordinates cannot be the same as the target coordinates";
+
+// default values
+const ROWS_DEFAULT = 10;
+const COLS_DEFAULT = 10;
+const SOURCE_R_DEFAULT = 0;
+const SOURCE_C_DEFAULT = 0;
+const ERR_MSG_COLOR = "oklch(46.946% 0.19265 29.223)";
+const INV_MSG_COLOR = "oklch(77.748% 0.0948 215.788)";
 
 
 class Settings {
-    ROWS_ERR_MSG = "Number of rows must be between 3 and 30";
-    COLS_ERR_MSG = "Number of columns must be between 3 and 30";
-    SRC_COORDS_ERR_MSG = "Source coordinates must be between ";
-    TGT_COORDS_ERR_MSG = "Target coordinates must be between ";
-    SAME_COORDS_ERR_MSG = "Source coordinates cannot be the same as the target coordinates";
-    ERR_MSG_COLOR = "oklch(46.946% 0.19265 29.223)";
-    INV_MSG_COLOR = "oklch(77.748% 0.0948 215.788)";
-
     constructor() {
+        // errors
         this.rowsErr = document.getElementById(ROWS_ERR_ID);
         this.colsErr = document.getElementById(COLS_ERR_ID);
-        this.srcCoordsErr = document.getElementById(SRC_COORDS_ERR_ID);
-        this.tgtCoordsErr = document.getElementById(TGT_COORDS_ERR_ID);
+        this.srcRError = document.getElementById(SRC_R_ERR_ID);
+        this.srcCError = document.getElementById(SRC_C_ERR_ID);
+        this.srcWallError = document.getElementById(SRC_WALL_ERR_ID);
+        this.srcSameError = document.getElementById(SRC_SAME_ERR_ID);
+        this.tgtRError = document.getElementById(TGT_R_ERR_ID);
+        this.tgtCError = document.getElementById(TGT_C_ERR_ID);
+        this.tgtWallError = document.getElementById(TGT_WALL_ERR_ID);
+        this.tgtSameError = document.getElementById(TGT_SAME_ERR_ID);
 
-        /**
-         * let source = [0, 0];
-         * let rows = 10;
-         * let cols = 10;
-         * let target = [rows - 1, cols - 1];
-         */
-        this.rows = 10;
-        this.cols = 10;
-        this.source = [0, 0];
+        // inputs
+        this.rowsInput = document.getElementById(ROWS_INPUT_ID);
+        this.colsInput = document.getElementById(COLS_INPUT_ID);
+        this.sourceRInput = document.getElementById(SOURCE_R_ID);
+        this.sourceCInput = document.getElementById(SOURCE_C_ID);
+        this.targetRInput = document.getElementById(TARGET_R_ID);
+        this.targetCInput = document.getElementById(TARGET_C_ID);
+
+        // configurables
+        this.rows = ROWS_DEFAULT;
+        this.cols = COLS_DEFAULT;
+        this.source = [SOURCE_R_DEFAULT, SOURCE_C_DEFAULT];
         this.target = [this.rows - 1, this.cols - 1];
+
+        this.setDefaultInputValues();
+        this.handleRowsInput();
+        this.handleColsInput();
+        this.handleSourceRInput();
+        this.handleSourceCInput();
+    }
+
+    setDefaultInputValues() {
+        this.rowsInput.value = this.rows;
+        this.colsInput.value = this.cols;
+
+        // TODO: setup initial board and set source and target dynamically based on default sizes
+        // for (let r = 0; r < this.rows; r++) {
+        //     for (let c = 0; c < this.cols; c++) {
+
+        //     }
+        // }
+
+        this.sourceRInput.value = this.source[0];
+        this.sourceCInput.value = this.source[1];
+
+        this.targetRInput.value = this.target[0];
+        this.targetCInput.value = this.target[1];
     }
 
     setErrorMessage(e, text) {
@@ -310,61 +370,82 @@ class Settings {
         e.innerText = ".";
     }
 
-    isValidRowSize(r) {
-        if (!(MIN_ROWS <= r <= MAX_ROWS)) {
-            // TODO: display out of bounds error msg
+    checkValidRowSize(r) {
+        if (MIN_ROWS <= r && r <= MAX_ROWS) {
+            this.unsetErrorMessage(this.rowsErr);
+            this.rows = r;
+        }
+        else {
+            this.setErrorMessage(this.rowsErr, ROWS_ERR_MSG);
+        }
+    }
+
+    checkValidColSize(c) {
+        if (MIN_COLS <= c && c <= MAX_COLS) {
+            this.unsetErrorMessage(this.colsErr);
+            this.cols = c;
+        }
+        else {
+            this.setErrorMessage(this.colsErr, COLS_ERR_MSG);
+        }
+    }
+
+    checkValidSourceR(r) {
+        if (0 <= r && r <= rows) {
+            this.unsetErrorMessage(this.srcRError);
+        }
+        else {
+            let msg = SRC_R_BOUNDS_ERR_MSG + ` ${this.rows}`;
+            this.setErrorMessage(this.srcRError, msg);
             return false;
         }
         return true;
     }
 
-    isValidColSize(c) {
-        if (!(MIN_COLS <= c <= MAX_COLS)) {
-            // TODO: display out of bounds error msg
+    checkValidSourceC(c) {
+        if (0 <= c && c <= cols) {
+            this.unsetErrorMessage(this.srcCError);
+        }
+        else {
+            let msg = SRC_C_BOUNDS_ERR_MSG + ` ${this.cols}`;
+            this.setErrorMessage(this.srcCError, msg);
             return false;
         }
         return true;
     }
 
-    setRows(r) {
-        if (!isValidRowSize(r)) {
+    checkIfSourceOnWall(r, c) {
+        if ((m.getMaze())[r][c] != 1) {
+            this.unsetErrorMessage(this.srcWallError);
+        }
+        else {
+            this.setErrorMessage(this.srcWallError, SRC_WALL_ERR_MSG);
             return false;
         }
-
-        rows = r;
         return true;
     }
 
-    setCols(c) {
-        if (!isValidColSize(c)) {
+    checkIfSourceSameAsTarget(r, c) {
+        if (r == target[0] && c == target[1]) {
+            this.setErrorMessage(this.srcSameError, SAME_COORDS_ERR_MSG);
             return false;
         }
-
-        cols = c;
+        else {
+            this.unsetErrorMessage(this.srcSameError);
+        }
         return true;
     }
 
-    isValidSourceCoords(r, c) {
-        if (!(0 <= r <= rows)) {
-            // TODO: display out of bounds error msg
-            return false;
+    checkIfTargetSameAsSource(r, c) {
+        if (r != source[0] && c != source[1]) {
+
         }
-        else if (!(0 <= c <= cols)) {
-            // TODO: display out of bounds error msg
-            return false;
-        }
-        else if (m.getMaze().length > 0 && (m.getMaze())[r][c] == 1) {
-            // TODO: display error msg - cannot place source coords on a wall
-            return false;
-        }
-        else if (target[0] == r && source[1] == c) {
+        else {
             // TODO: display error msg - source and target coords cannot be the same
-            return false;
         }
-        return true;
     }
 
-    isValidTargetCoords(r, c) {
+    checkValidTargetCoords(r, c) {
         if (!(0 <= r <= rows)) {
             // TODO: display out of bounds error msg
             return false;
@@ -384,27 +465,72 @@ class Settings {
         return true;
     }
 
-    setSourceCoords(r, c) {
-        if (!isValidSourceCoords(r, c)) {
-            return false;
-        }
-
-        source = [r, c];
-        return true;
+    handleRowsInput() {
+        this.rowsInput.addEventListener("change", (e) => {
+            this.checkValidRowSize(e.target.value);
+        });
     }
 
-    setTargetCoords(r, c) {
-        if (!isValidTargetCoords(r, c)) {
-            return false;
-        }
+    handleColsInput() {
+        this.colsInput.addEventListener("change", (e) => {
+            this.checkValidColSize(e.target.value);
+        });
+    }
 
-        target = [r, c];
-        return true;
+    handleSourceRInput() {
+        this.sourceRInput.addEventListener("change", (e) => {
+            let r = e.target.value;
+            let c = this.sourceCInput.value;
+
+            if (!this.checkValidSourceR(r)) {
+                /**
+                 * if coordinates are out of bounds,
+                 * cannot check subsequent cases
+                 */
+                return;
+            }
+
+            if (!this.checkIfSourceOnWall(r, c)) {
+                return;
+            }
+
+            if (!this.checkIfSourceSameAsTarget(r, c)) {
+                return;
+            }
+
+            this.source[0] = r;
+        });
+    }
+
+    handleSourceCInput() {
+        this.sourceCInput.addEventListener("change", (e) => {
+            let r = this.sourceRInput.value;
+            let c = e.target.value;
+
+            if (!this.checkValidSourceC(c)) {
+                /**
+                 * if coordinates are out of bounds,
+                 * cannot check subsequent cases
+                 */
+                return;
+            }
+
+            if (!this.checkIfSourceOnWall(r, c)) {
+                return;
+            }
+
+            if (!this.checkIfSourceSameAsTarget(r, c)) {
+                return;
+            }
+
+            this.source[1] = c;
+        });
     }
 }
 
 
 function solve() {
+    // TODO: fix this
     if (solveButton.innerText == "RESET") {
         m = new Maze(rows, cols, blocked, source, target);
         solveButton.innerText = "SOLVE";
@@ -424,3 +550,4 @@ function solve() {
 
 const settingsButton = new SettingsButton();
 const closeSettingsButton = new CloseSettingsButton();
+let settings = new Settings();
