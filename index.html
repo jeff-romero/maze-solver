@@ -9,55 +9,67 @@
     <body>
         <div id="top">
             <i id="settings-button" class="material-icons">&#xe8b8</i>
-            <button id="solve" onclick="solve()">SOLVE</button>
+            <button id="solve" onclick="settings.solve()">SOLVE</button>
             <i id="invisible-settings-button" class="material-icons">&#xe8b8</i>
         </div>
         <div id="bottom">
             <div id="settings">
-                <div id="settings-top">
-                    <div id="close" class="close-button">&#x2715</div>
-                </div>
-                <div id="settings-bottom">
+                <div class="category">
                     <div class="label-input-group">
                         <span class="settings-label">Rows</span>
                         <input id="rows" type="number" min="3" max="30">
+                    </div>
+                    <div class="errors">
                         <span id="rows-error" class="settings-input-invisible-error">.</span>
                         <span class="settings-input-invisible-error">.</span>
                         <span class="settings-input-invisible-error">.</span>
                         <span class="settings-input-invisible-error">.</span>
                     </div>
+                </div>
+                <div class="category">
                     <div class="label-input-group">
                         <span class="settings-label">Columns</span>
                         <input id="columns" type="number" min="3" max="30">
+                    </div>
+                    <div class="errors">
                         <span id="cols-error" class="settings-input-invisible-error">.</span>
                         <span class="settings-input-invisible-error">.</span>
                         <span class="settings-input-invisible-error">.</span>
                         <span class="settings-input-invisible-error">.</span>
                     </div>
+                </div>
+                <div class="category">
                     <div class="label-input-group">
                         <span class="settings-label">Source Coordinates</span>
                         <div>
                             <input id="source-r" type="number" placeholder="row" min="0" max="29">
                             <input id="source-c" type="number" placeholder="col" min="0" max="29">
                         </div>
+                    </div>
+                    <div class="errors">
                         <span id="source-r-error" class="settings-input-invisible-error">.</span>
                         <span id="source-c-error" class="settings-input-invisible-error">.</span>
                         <span id="source-wall-error" class="settings-input-invisible-error">.</span>
                         <span id="source-same-error" class="settings-input-invisible-error">.</span>
                     </div>
+                </div>
+                <div class="category">
                     <div class="label-input-group">
                         <span class="settings-label">Target Coordinates</span>
                         <div>
                             <input id="target-r" type="number" placeholder="row" min="0" max="29">
                             <input id="target-c" type="number" placeholder="col" min="0" max="29">
                         </div>
+                    </div>
+                    <div class="errors">
                         <span id="target-r-error" class="settings-input-invisible-error">.</span>
                         <span id="target-c-error" class="settings-input-invisible-error">.</span>
                         <span id="target-wall-error" class="settings-input-invisible-error">.</span>
                         <span id="target-same-error" class="settings-input-invisible-error">.</span>
                     </div>
-                    <button id="draw-walls" onclick="">DRAW WALLS</button>
                 </div>
+                <button id="draw-walls" onclick="">DRAW WALLS</button>
+                <div id="close" class="close-button">&#x2715</div>
             </div>
             <div id="maze"></div>
         </div>

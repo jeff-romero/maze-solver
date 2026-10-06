@@ -1,3 +1,11 @@
+const MIN_ROWS = 3;
+const MIN_COLS = 3;
+const MAX_ROWS = 30;
+const MAX_COLS = 30;
+
+let solveButton = document.getElementById("solve");
+
+
 class Maze {
     constructor(rows, cols, blocked, source, target) {
         this.maze = [];
@@ -25,10 +33,63 @@ class Maze {
         for (let i = 0; i < this.blocked.length; i++) {
             const rBlocked = this.blocked[i][0];
             const cBlocked = this.blocked[i][1];
+
+            if (rBlocked >= this.rows || cBlocked >= this.cols) {
+                continue;
+            }
+
             this.maze[rBlocked][cBlocked] = 1;
         }
 
         this.drawMaze();
+    }
+
+    getRows() {
+        return this.rows;
+    }
+
+    getCols() {
+        return this.cols;
+    }
+
+    getBlocked() {
+        return this.blocked;
+    }
+
+    getSource() {
+        return this.source;
+    }
+
+    getTarget() {
+        return this.target;
+    }
+
+    isInbounds(r, c) {
+        if ((0 <= r && r < this.rows) && (0 <= c && c < this.cols)) {
+            return true;
+        }
+        return false;
+    }
+
+    isWall(r, c) {
+        if (this.isInbounds(r, c) && this.maze[r][c] == 1) {
+            return true;
+        }
+        return false;
+    }
+
+    isSource(r, c) {
+        if (this.isInbounds(r, c) && r == this.source[0] && c == this.source[1]) {
+            return true;
+        }
+        return false;
+    }
+
+    isTarget(r, c) {
+        if (this.isInbounds(r, c) && r == this.target[0] && c == this.target[1]) {
+            return true;
+        }
+        return false;
     }
 
     isValid(r, c) {
@@ -89,7 +150,7 @@ class Maze {
 
     drawMaze() {
         let maze = document.getElementById("maze");
-        
+
         while (maze.firstChild) {
             maze.removeChild(maze.firstChild);
         }
@@ -128,9 +189,15 @@ class Maze {
     getMaze() {
         return this.maze;
     }
+
+    solve() {
+        this.pathfind(this.source[0], this.source[1]);
+        this.drawMaze();
+    }
 }
 
-const blocked = [
+
+let blocked = [
     [0, 1],
     [1, 1],
     [2, 1],
@@ -173,28 +240,6 @@ const blocked = [
     [9, 7],
     [9, 8]
 ];
-const MIN_ROWS = 3;
-const MIN_COLS = 3;
-const MAX_ROWS = 30;
-const MAX_COLS = 30;
-let source = [0, 0];
-let rows = 10;
-let cols = 10;
-let target = [rows - 1, cols - 1];
-let m = new Maze(rows, cols, blocked, source, target);
-let solveButton = document.getElementById("solve");
-// let settings = document.getElementById("settings");
-const settingsWindow = document.getElementById("settings");
-
-
-function toggleSettingsWindow() {
-    if (settingsWindow.style.display == "block") {
-        settingsWindow.style.display = "none";
-    }
-    else {
-        settingsWindow.style.display = "block";
-    }
-}
 
 
 class SettingsButton {
@@ -286,6 +331,7 @@ const SOURCE_R_ID = "source-r";
 const SOURCE_C_ID = "source-c";
 const TARGET_R_ID = "target-r";
 const TARGET_C_ID = "target-c";
+const DRAW_WALLS_ID = "draw-walls";
 
 // error messages
 const ROWS_ERR_MSG = "Number of rows must be between 3 and 30";
@@ -328,12 +374,16 @@ class Settings {
         this.sourceCInput = document.getElementById(SOURCE_C_ID);
         this.targetRInput = document.getElementById(TARGET_R_ID);
         this.targetCInput = document.getElementById(TARGET_C_ID);
+        this.drawWalls = document.getElementById(DRAW_WALLS_ID);
 
         // configurables
         this.rows = ROWS_DEFAULT;
         this.cols = COLS_DEFAULT;
         this.source = [SOURCE_R_DEFAULT, SOURCE_C_DEFAULT];
         this.target = [this.rows - 1, this.cols - 1];
+        this.blocked = blocked;
+
+        this.maze = this.createMaze();
 
         this.setDefaultInputValues();
         this.handleRowsInput();
@@ -342,18 +392,89 @@ class Settings {
         this.handleSourceCInput();
         this.handleTargetRInput();
         this.handleTargetCInput();
+        this.handleDrawWalls();
+    }
+
+    removeWall(r, c) {
+        for (let i = 0; i < this.blocked; i++) {
+            const rBlocked = this.blocked[i][0];
+            const cBlocked = this.blocked[i][1];
+
+            if (r == rBlocked && c == cBlocked) {
+                if (i == 0) {
+                    this.blocked.shift();
+                }
+                else if (i == (this.blocked.length - 1)) {
+                    this.blocked.pop();
+                }
+                else {
+                    // wall coordinate is in the middle
+                    let left = this.blocked.slice(0, i);
+                    let right = this.blocked.slice(i + 1);
+                    this.blocked = left.concat(right);
+                }
+            }
+        }
+    }
+
+    validateSource() {
+
+    }
+
+    validateTarget() {
+        /**
+         * when the board size changes, the target may be out of bounds.
+         * if it is out of bounds, then a new target coordinate will be chosen.
+         * the new target coordinate will be chosen by looking for the
+         * bottom-right-most coordinate that is not a wall or a
+         * source coordinate.
+         */
+        if (this.rows > this.target[0]) {
+            return;
+        }
+
+        const oldTarget = [this.target[0], this.target[1]];
+
+        let foundNewTarget = false;
+        for (let r = this.rows - 1; !foundNewTarget && r >= 0; r--) {
+            for (let c = this.cols - 1; !foundNewTarget && c >= 0; c--) {
+                if (this.maze.isWall(r, c) || this.maze.isSource(r, c)) {
+                    continue;
+                }
+                console.log(`new target: (${r}, ${c})`);
+                this.target = [r, c];
+                foundNewTarget = true;
+            }
+        }
+
+        if (oldTarget[0] == this.target[0] && oldTarget[1] == this.target[1]) {
+            console.log("removing wall and choosing target");
+            /**
+             * if entered, user tried to break the code by filling the maze
+             * with walls and leaving no valid spot for a target coordinate.
+             */
+            for (let r = this.rows - 1; r >= 0; r--) {
+                for (let c = this.cols - 1; c >= 0; c--) {
+                    if (this.maze.isSource(r, c)) {
+                        continue;
+                    }
+
+                    this.removeWall(r, c);
+                    this.target = [r, c];
+                }
+            }
+        }
+    }
+
+    createMaze() {
+        this.validateTarget();
+
+        return new Maze(this.rows, this.cols, this.blocked, this.source, this.target);
     }
 
     setDefaultInputValues() {
         this.rowsInput.value = this.rows;
         this.colsInput.value = this.cols;
-
-        // TODO: setup initial board and set source and target dynamically based on default sizes
-        // for (let r = 0; r < this.rows; r++) {
-        //     for (let c = 0; c < this.cols; c++) {
-
-        //     }
-        // }
 
         this.sourceRInput.value = this.source[0];
         this.sourceCInput.value = this.source[1];
@@ -380,6 +501,7 @@ class Settings {
         if (MIN_ROWS <= r && r <= MAX_ROWS) {
             this.unsetErrorMessage(this.rowsErr);
             this.rows = r;
+            this.maze = this.createMaze();
         }
         else {
             this.setErrorMessage(this.rowsErr, ROWS_ERR_MSG);
@@ -397,7 +519,7 @@ class Settings {
     }
 
     isValidR(r, e, msg) {
-        if (0 <= r && r <= this.rows) {
+        if (0 <= r && r <= (this.maze.getMaze()).length - 1) {
             this.unsetErrorMessage(e);
             return true;
         }
@@ -408,7 +530,7 @@ class Settings {
     }
 
     isValidC(c, e, msg) {
-        if (0 <= c && c <= this.cols) {
+        if (0 <= c && c <= (this.maze.getMaze())[0].length - 1) {
             this.unsetErrorMessage(e);
             return true;
         }
@@ -419,7 +541,7 @@ class Settings {
     }
 
     areCoordsOnWall(r, c, e, msg) {
-        if ((m.getMaze())[r][c] != 1) {
+        if ((this.maze.getMaze())[r][c] != 1) {
             this.unsetErrorMessage(e);
             return false;
         }
@@ -440,26 +562,6 @@ class Settings {
         }
     }
 
-    checkValidTargetCoords(r, c) {
-        if (!(0 <= r <= rows)) {
-            // TODO: display out of bounds error msg
-            return false;
-        }
-        else if (!(0 <= c <= cols)) {
-            // TODO: display out of bounds error msg
-            return false;
-        }
-        else if (m.getMaze().length > 0 && (m.getMaze())[r][c] == 1) {
-            // TODO: display error msg - cannot place target coords on a wall
-            return false;
-        }
-        else if (source[0] == r && source[1] == c) {
-            // TODO: display error msg - source and target coords cannot be the same
-            return false;
-        }
-        return true;
-    }
-
     handleRowsInput() {
         this.rowsInput.addEventListener("change", (e) => {
             this.checkValidRowSize(e.target.value);
@@ -477,7 +579,7 @@ class Settings {
             let r = e.target.value;
             let c = this.sourceCInput.value;
 
-            if (!this.isValidR(r, this.srcRError, SRC_R_BOUNDS_ERR_MSG + ` ${this.rows}`)) {
+            if (!this.isValidR(r, this.srcRError, SRC_R_BOUNDS_ERR_MSG + ` ${this.maze.getMaze().length - 1}`)) {
                 /**
                  * if coordinates are out of bounds,
                  * cannot check subsequent cases
@@ -502,7 +604,7 @@ class Settings {
             let r = this.sourceRInput.value;
             let c = e.target.value;
 
-            if (!this.isValidC(c, this.srcCError, SRC_R_BOUNDS_ERR_MSG)) {
+            if (!this.isValidC(c, this.srcCError, SRC_C_BOUNDS_ERR_MSG + ` ${(this.maze.getMaze())[0].length - 1}`)) {
                 /**
                  * if coordinates are out of bounds,
                  * cannot check subsequent cases
@@ -527,7 +629,7 @@ class Settings {
             let r = e.target.value;
             let c = this.targetCInput.value;
 
-            if (!this.isValidR(r, this.tgtRError, TGT_R_BOUNDS_ERR_MSG + ` ${this.rows}`)) {
+            if (!this.isValidR(r, this.tgtRError, TGT_R_BOUNDS_ERR_MSG + ` ${this.maze.getMaze().length - 1}`)) {
                 /**
                  * if coordinates are out of bounds,
                  * cannot check subsequent cases
@@ -552,7 +654,7 @@ class Settings {
             let r = this.targetRInput.value;
             let c = e.target.value;
 
-            if (!this.isValidC(c, this.tgtCError, TGT_C_BOUNDS_ERR_MSG)) {
+            if (!this.isValidC(c, this.tgtCError, TGT_C_BOUNDS_ERR_MSG + ` ${(this.maze.getMaze())[0].length - 1}`)) {
                 /**
                  * if coordinates are out of bounds,
                  * cannot check subsequent cases
@@ -571,21 +673,47 @@ class Settings {
             this.target[1] = c;
         });
     }
+
+    toggleWall() {
+        /**
+         * check if cell is not source or target
+         * re-draw at some point idk where yet
+         * if removing, remove from this.blocked
+         */
+    }
+
+    handleDrawWalls() {
+        this.drawWalls.addEventListener("mouseup", (e) => {
+
+        });
+
+        this.drawWalls.addEventListener("touchend", (e) => {
+
+        });
+    }
+
+    solve() {
+        if (solveButton.innerText == "RESET") {
+            this.maze = this.createMaze();
+            solveButton.innerText = "SOLVE";
+            return;
+        }
+
+        this.maze.solve();
+
+        solveButton.innerText = "RESET";
+    }
 }
 
 
-function solve() {
-    // TODO: fix this
-    if (solveButton.innerText == "RESET") {
-        m = new Maze(rows, cols, blocked, source, target);
-        solveButton.innerText = "SOLVE";
-        return;
+const settingsWindow = document.getElementById("settings");
+function toggleSettingsWindow() {
+    if (settingsWindow.style.display == "flex") {
+        settingsWindow.style.display = "none";
     }
-
-    m.pathfind(source[0], source[1]);
-    m.drawMaze();
-
-    solveButton.innerText = "RESET";
+    else {
+        settingsWindow.style.display = "flex";
+    }
 }
 
 // TODO: option to block cells
