@@ -366,6 +366,10 @@ class Settings {
     }
 
     unsetErrorMessage(e) {
+        if (e.style.color == "oklch(77.748% 0.0948 215.788)" || e.innerText == ".") {
+            return;
+        }
+
         e.style.color = "oklch(77.748% 0.0948 215.788)";
         e.innerText = ".";
     }
@@ -390,50 +394,48 @@ class Settings {
         }
     }
 
-    checkValidSourceR(r) {
-        if (0 <= r && r <= rows) {
-            this.unsetErrorMessage(this.srcRError);
+    isValidR(r, e, msg) {
+        if (0 <= r && r <= this.rows) {
+            this.unsetErrorMessage(e);
+            return true;
         }
         else {
-            let msg = SRC_R_BOUNDS_ERR_MSG + ` ${this.rows}`;
-            this.setErrorMessage(this.srcRError, msg);
+            this.setErrorMessage(e, msg);
             return false;
         }
-        return true;
     }
 
-    checkValidSourceC(c) {
-        if (0 <= c && c <= cols) {
-            this.unsetErrorMessage(this.srcCError);
+    isValidC(c, e, msg) {
+        if (0 <= c && c <= this.cols) {
+            this.unsetErrorMessage(e);
+            return true;
         }
         else {
-            let msg = SRC_C_BOUNDS_ERR_MSG + ` ${this.cols}`;
-            this.setErrorMessage(this.srcCError, msg);
+            this.setErrorMessage(e, msg);
             return false;
         }
-        return true;
     }
 
-    checkIfSourceOnWall(r, c) {
+    areCoordsOnWall(r, c, e, msg) {
         if ((m.getMaze())[r][c] != 1) {
-            this.unsetErrorMessage(this.srcWallError);
-        }
-        else {
-            this.setErrorMessage(this.srcWallError, SRC_WALL_ERR_MSG);
+            this.unsetErrorMessage(e);
             return false;
         }
-        return true;
+        else {
+            this.setErrorMessage(e, msg);
+            return true;
+        }
     }
 
-    checkIfSourceSameAsTarget(r, c) {
-        if (r == target[0] && c == target[1]) {
-            this.setErrorMessage(this.srcSameError, SAME_COORDS_ERR_MSG);
-            return false;
+    areCoordsSame(r1, c1, r2, c2, e, msg) {
+        if (r1 == r2 && c1 == c2) {
+            this.setErrorMessage(e, msg);
+            return true;
         }
         else {
-            this.unsetErrorMessage(this.srcSameError);
+            this.unsetErrorMessage(e);
+            return false;
         }
-        return true;
     }
 
     checkIfTargetSameAsSource(r, c) {
@@ -482,7 +484,7 @@ class Settings {
             let r = e.target.value;
             let c = this.sourceCInput.value;
 
-            if (!this.checkValidSourceR(r)) {
+            if (!this.isValidR(r, this.srcRError, SRC_R_BOUNDS_ERR_MSG + ` ${this.rows}`)) {
                 /**
                  * if coordinates are out of bounds,
                  * cannot check subsequent cases
@@ -490,11 +492,11 @@ class Settings {
                 return;
             }
 
-            if (!this.checkIfSourceOnWall(r, c)) {
+            if (this.areCoordsOnWall(r, c, this.srcWallError, SRC_WALL_ERR_MSG)) {
                 return;
             }
 
-            if (!this.checkIfSourceSameAsTarget(r, c)) {
+            if (this.areCoordsSame(r, c, this.target[0], this.target[1], this.srcSameError, SAME_COORDS_ERR_MSG)) {
                 return;
             }
 
@@ -507,7 +509,7 @@ class Settings {
             let r = this.sourceRInput.value;
             let c = e.target.value;
 
-            if (!this.checkValidSourceC(c)) {
+            if (!this.isValidC(c, this.srcCError, SRC_R_BOUNDS_ERR_MSG)) {
                 /**
                  * if coordinates are out of bounds,
                  * cannot check subsequent cases
@@ -515,11 +517,11 @@ class Settings {
                 return;
             }
 
-            if (!this.checkIfSourceOnWall(r, c)) {
+            if (this.areCoordsOnWall(r, c, this.srcWallError, SRC_WALL_ERR_MSG)) {
                 return;
             }
 
-            if (!this.checkIfSourceSameAsTarget(r, c)) {
+            if (this.areCoordsSame(r, c, this.target[0], this.target[1], this.srcSameError, SAME_COORDS_ERR_MSG)) {
                 return;
             }
 
