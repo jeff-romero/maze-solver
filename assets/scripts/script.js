@@ -340,6 +340,8 @@ class Settings {
         this.handleColsInput();
         this.handleSourceRInput();
         this.handleSourceCInput();
+        this.handleTargetRInput();
+        this.handleTargetCInput();
     }
 
     setDefaultInputValues() {
@@ -438,15 +440,6 @@ class Settings {
         }
     }
 
-    checkIfTargetSameAsSource(r, c) {
-        if (r != source[0] && c != source[1]) {
-
-        }
-        else {
-            // TODO: display error msg - source and target coords cannot be the same
-        }
-    }
-
     checkValidTargetCoords(r, c) {
         if (!(0 <= r <= rows)) {
             // TODO: display out of bounds error msg
@@ -526,6 +519,56 @@ class Settings {
             }
 
             this.source[1] = c;
+        });
+    }
+
+    handleTargetRInput() {
+        this.targetRInput.addEventListener("change", (e) => {
+            let r = e.target.value;
+            let c = this.targetCInput.value;
+
+            if (!this.isValidR(r, this.tgtRError, TGT_R_BOUNDS_ERR_MSG + ` ${this.rows}`)) {
+                /**
+                 * if coordinates are out of bounds,
+                 * cannot check subsequent cases
+                 */
+                return;
+            }
+
+            if (this.areCoordsOnWall(r, c, this.tgtWallError, TGT_WALL_ERR_MSG)) {
+                return;
+            }
+
+            if (this.areCoordsSame(r, c, this.source[0], this.source[1], this.tgtSameError, SAME_COORDS_ERR_MSG)) {
+                return;
+            }
+
+            this.target[0] = r;
+        });
+    }
+
+    handleTargetCInput() {
+        this.targetCInput.addEventListener("change", (e) => {
+            let r = this.targetRInput.value;
+            let c = e.target.value;
+
+            if (!this.isValidC(c, this.tgtCError, TGT_C_BOUNDS_ERR_MSG)) {
+                /**
+                 * if coordinates are out of bounds,
+                 * cannot check subsequent cases
+                 */
+                return;
+            }
+
+            if (this.areCoordsOnWall(r, c, this.tgtWallError, TGT_WALL_ERR_MSG)) {
+                return;
+            }
+
+            if (this.areCoordsSame(r, c, this.source[0], this.source[1], this.tgtSameError, SAME_COORDS_ERR_MSG)) {
+                return;
+            }
+
+            this.target[1] = c;
         });
     }
 }
