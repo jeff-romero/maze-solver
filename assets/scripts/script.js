@@ -99,6 +99,119 @@ class Maze {
         return true;
     }
 
+    removeWall(r, c) {
+        for (let i = 0; i < this.blocked; i++) {
+            const rBlocked = this.blocked[i][0];
+            const cBlocked = this.blocked[i][1];
+
+            if (r == rBlocked && c == cBlocked) {
+                if (i == 0) {
+                    this.blocked.shift();
+                }
+                else if (i == (this.blocked.length - 1)) {
+                    this.blocked.pop();
+                }
+                else {
+                    // wall coordinate is in the middle
+                    let left = this.blocked.slice(0, i);
+                    let right = this.blocked.slice(i + 1);
+                    this.blocked = left.concat(right);
+                }
+            }
+        }
+    }
+
+    validateBlocked() {
+
+    }
+
+    validateSource() {
+
+    }
+
+    validateTarget() {
+        /**
+         * when the board size changes, the target may be out of bounds.
+         * if it is out of bounds, then a new target coordinate will be chosen.
+         * the new target coordinate will be chosen by looking for the
+         * bottom-right-most coordinate that is not a wall or a
+         * source coordinate.
+         */
+        if (this.rows > this.target[0]) {
+            return;
+        }
+
+        const oldTarget = [this.target[0], this.target[1]];
+
+        let foundNewTarget = false;
+        for (let r = this.rows - 1; !foundNewTarget && r >= 0; r--) {
+            for (let c = this.cols - 1; !foundNewTarget && c >= 0; c--) {
+                if (this.isWall(r, c) || this.isSource(r, c)) {
+                    continue;
+                }
+                console.log(`new target: (${r}, ${c})`);
+                this.target = [r, c];
+                foundNewTarget = true;
+            }
+        }
+
+        if (oldTarget[0] == this.target[0] && oldTarget[1] == this.target[1]) {
+            console.log("removing wall and choosing target");
+            /**
+             * if entered, user tried to break the code by filling the maze
+             * with walls and leaving no valid spot for a target coordinate.
+             */
+            for (let r = this.rows - 1; r >= 0; r--) {
+                for (let c = this.cols - 1; c >= 0; c--) {
+                    if (this.isSource(r, c)) {
+                        continue;
+                    }
+
+                    this.removeWall(r, c);
+                    this.target = [r, c];
+                }
+            }
+        }
+    }
+
+    createMaze() {
+        this.undrawMaze();
+
+        this.maze = [];
+        this.visited = [];
+
+        for (let r = 0; r < this.rows; r++) {
+            this.maze.push([]);
+            for (let c = 0; c < this.cols; c++) {
+                this.maze[r].push(0);
+            }
+        }
+
+        for (let r = 0; r < this.rows; r++) {
+            this.visited.push([]);
+            for (let c = 0; c < this.cols; c++) {
+                this.visited[r].push(0);
+            }
+        }
+
+        this.validateBlocked();
+        this.validateSource();
+        this.validateTarget();
+
+        for (let i = 0; i < this.blocked.length; i++) {
+            const rBlocked = this.blocked[i][0];
+            const cBlocked = this.blocked[i][1];
+
+            if (rBlocked >= this.rows || cBlocked >= this.cols) {
+                continue;
+            }
+
+            this.maze[rBlocked][cBlocked] = 1;
+        }
+
+        this.drawMaze();
+    }
+
     pathfind(r, c) {
         if (r == this.target[0] && c == this.target[1]) {
             this.maze[r][c] = "x";
@@ -145,6 +258,14 @@ class Maze {
                 console.log(`${this.maze[r][c]} `);
             }
             console.log();
+        }
+    }
+
+    undrawMaze() {
+        let maze = document.getElementById("maze");
+
+        while (maze.firstChild) {
+            maze.removeChild(maze.firstChild);
         }
     }
 
@@ -376,14 +497,7 @@ class Settings {
         this.targetCInput = document.getElementById(TARGET_C_ID);
         this.drawWalls = document.getElementById(DRAW_WALLS_ID);
 
-        // configurables
-        this.rows = ROWS_DEFAULT;
-        this.cols = COLS_DEFAULT;
-        this.source = [SOURCE_R_DEFAULT, SOURCE_C_DEFAULT];
-        this.target = [this.rows - 1, this.cols - 1];
-        this.blocked = blocked;
-
-        this.maze = this.createMaze();
+        this.maze = new Maze(ROWS_DEFAULT, COLS_DEFAULT, blocked, [SOURCE_R_DEFAULT, SOURCE_C_DEFAULT], [ROWS_DEFAULT - 1, COLS_DEFAULT - 1]);
 
         this.setDefaultInputValues();
         this.handleRowsInput();
@@ -395,92 +509,15 @@ class Settings {
         this.handleDrawWalls();
     }
 
-    removeWall(r, c) {
-        for (let i = 0; i < this.blocked; i++) {
-            const rBlocked = this.blocked[i][0];
-            const cBlocked = this.blocked[i][1];
-
-            if (r == rBlocked && c == cBlocked) {
-                if (i == 0) {
-                    this.blocked.shift();
-                }
-                else if (i == (this.blocked.length - 1)) {
-                    this.blocked.pop();
-                }
-                else {
-                    // wall coordinate is in the middle
-                    let left = this.blocked.slice(0, i);
-                    let right = this.blocked.slice(i + 1);
-                    this.blocked = left.concat(right);
-                }
-            }
-        }
-    }
-
-    validateSource() {
-
-    }
-
-    validateTarget() {
-        /**
-         * when the board size changes, the target may be out of bounds.
-         * if it is out of bounds, then a new target coordinate will be chosen.
-         * the new target coordinate will be chosen by looking for the
-         * bottom-right-most coordinate that is not a wall or a
-         * source coordinate.
-         */
-        if (this.rows > this.target[0]) {
-            return;
-        }
-
-        const oldTarget = [this.target[0], this.target[1]];
-
-        let foundNewTarget = false;
-        for (let r = this.rows - 1; !foundNewTarget && r >= 0; r--) {
-            for (let c = this.cols - 1; !foundNewTarget && c >= 0; c--) {
-                if (this.maze.isWall(r, c) || this.maze.isSource(r, c)) {
-                    continue;
-                }
-                console.log(`new target: (${r}, ${c})`);
-                this.target = [r, c];
-                foundNewTarget = true;
-            }
-        }
-
-        if (oldTarget[0] == this.target[0] && oldTarget[1] == this.target[1]) {
-            console.log("removing wall and choosing target");
-            /**
-             * if entered, user tried to break the code by filling the maze
-             * with walls and leaving no valid spot for a target coordinate.
-             */
-            for (let r = this.rows - 1; r >= 0; r--) {
-                for (let c = this.cols - 1; c >= 0; c--) {
-                    if (this.maze.isSource(r, c)) {
-                        continue;
-                    }
-
-                    this.removeWall(r, c);
-                    this.target = [r, c];
-                }
-            }
-        }
-    }
-
-    createMaze() {
-        this.validateTarget();
-
-        return new Maze(this.rows, this.cols, this.blocked, this.source, this.target);
-    }
-
     setDefaultInputValues() {
-        this.rowsInput.value = this.rows;
-        this.colsInput.value = this.cols;
+        this.rowsInput.value = this.maze.rows;
+        this.colsInput.value = this.maze.cols;
 
-        this.sourceRInput.value = this.source[0];
-        this.sourceCInput.value = this.source[1];
+        this.sourceRInput.value = this.maze.source[0];
+        this.sourceCInput.value = this.maze.source[1];
 
-        this.targetRInput.value = this.target[0];
-        this.targetCInput.value = this.target[1];
+        this.targetRInput.value = this.maze.target[0];
+        this.targetCInput.value = this.maze.target[1];
     }
 
     setErrorMessage(e, text) {
@@ -500,8 +537,9 @@ class Settings {
     checkValidRowSize(r) {
         if (MIN_ROWS <= r && r <= MAX_ROWS) {
             this.unsetErrorMessage(this.rowsErr);
-            this.rows = r;
-            this.maze = this.createMaze();
+            this.maze.rows = r;
+            console.log(`checkValidRowSize: new rows - ${this.maze.rows}`);
+            this.maze.createMaze();
         }
         else {
             this.setErrorMessage(this.rowsErr, ROWS_ERR_MSG);
@@ -511,7 +549,7 @@ class Settings {
     checkValidColSize(c) {
         if (MIN_COLS <= c && c <= MAX_COLS) {
             this.unsetErrorMessage(this.colsErr);
-            this.cols = c;
+            // this.maze.cols = c;
         }
         else {
             this.setErrorMessage(this.colsErr, COLS_ERR_MSG);
@@ -591,11 +629,11 @@ class Settings {
                 return;
             }
 
-            if (this.areCoordsSame(r, c, this.target[0], this.target[1], this.srcSameError, SAME_COORDS_ERR_MSG)) {
+            if (this.areCoordsSame(r, c, this.maze.target[0], this.maze.target[1], this.srcSameError, SAME_COORDS_ERR_MSG)) {
                 return;
             }
 
-            this.source[0] = r;
+            this.maze.source[0] = r;
         });
     }
 
@@ -616,11 +654,11 @@ class Settings {
                 return;
             }
 
-            if (this.areCoordsSame(r, c, this.target[0], this.target[1], this.srcSameError, SAME_COORDS_ERR_MSG)) {
+            if (this.areCoordsSame(r, c, this.maze.target[0], this.maze.target[1], this.srcSameError, SAME_COORDS_ERR_MSG)) {
                 return;
             }
 
-            this.source[1] = c;
+            this.maze.source[1] = c;
         });
     }
 
@@ -641,11 +679,11 @@ class Settings {
                 return;
             }
 
-            if (this.areCoordsSame(r, c, this.source[0], this.source[1], this.tgtSameError, SAME_COORDS_ERR_MSG)) {
+            if (this.areCoordsSame(r, c, this.maze.source[0], this.maze.source[1], this.tgtSameError, SAME_COORDS_ERR_MSG)) {
                 return;
             }
 
-            this.target[0] = r;
+            this.maze.target[0] = r;
         });
     }
 
@@ -666,11 +704,11 @@ class Settings {
                 return;
             }
 
-            if (this.areCoordsSame(r, c, this.source[0], this.source[1], this.tgtSameError, SAME_COORDS_ERR_MSG)) {
+            if (this.areCoordsSame(r, c, this.maze.source[0], this.maze.source[1], this.tgtSameError, SAME_COORDS_ERR_MSG)) {
                 return;
             }
 
-            this.target[1] = c;
+            this.maze.target[1] = c;
         });
     }
 
@@ -694,7 +732,7 @@ class Settings {
 
     solve() {
         if (solveButton.innerText == "RESET") {
-            this.maze = this.createMaze();
+            this.maze.createMaze();
             solveButton.innerText = "SOLVE";
             return;
         }
